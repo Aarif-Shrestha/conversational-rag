@@ -28,14 +28,14 @@ async def upload_document(
     chunking_strategy: str = "recursive",
     db: Session = Depends(get_db),
 ):
-    # 1. Check filename
+    #  Cfilename checkk to do
     if file.filename is None:
         raise HTTPException(
             status_code=400,
             detail="File name is missing",
         )
 
-    # 2. Check file type
+    #  file ko type
     allowed_extensions = {".pdf", ".txt"}
 
     file_extension = Path(file.filename).suffix.lower()
@@ -46,19 +46,18 @@ async def upload_document(
             detail="Only PDF and TXT files are allowed",
         )
 
-    # 3. Create unique document ID
+    #  create unique document ID
     document_id = str(uuid4())
 
-    # 4. Create file path
+    #  Create file path
     file_path = UPLOAD_DIR / f"{document_id}{file_extension}"
 
-    # 5. Read uploaded file
+    #  Read uploaded file
     file_content = await file.read()
 
-    # 6. Save file
     file_path.write_bytes(file_content)
 
-    # 7. Extract text
+    # extract text
     try:
         text = extract_text(str(file_path))
     except Exception as error:
@@ -73,7 +72,7 @@ async def upload_document(
             detail="No text could be extracted from the document",
         )
 
-    # 8. Split text into chunks
+    #  Split text into chunks
     try:
         chunks = chunk_text(
             text=text,
@@ -85,13 +84,13 @@ async def upload_document(
             detail=str(error),
         )
 
-    # 9. Generate embeddings
+    #  embeddings
     embeddings = generate_embeddings(chunks)
 
-    # 10. Create Qdrant collection
+    # Create Qdrant collection
     create_collection()
 
-    # 11. Store chunks + embeddings in Qdrant
+    #  Store chunks and embeddings in Qdrant
     store_chunks(
         document_id=document_id,
         filename=file.filename,
@@ -109,7 +108,7 @@ async def upload_document(
     db.add(document_record)
     db.commit()
 
-    # 12. Return result
+   
     return {
         "document_id": document_id,
         "filename": file.filename,

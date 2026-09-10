@@ -11,6 +11,7 @@ from app.services.embedding_service import generate_embeddings
 from app.services.vector_service import create_collection, store_chunks
 
 
+
 router = APIRouter(
     prefix="/documents",
     tags=["Documents"],
